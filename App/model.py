@@ -71,7 +71,10 @@ def newCatalog(tipo = 'ARRAY_LIST', mapTipo = 'CHAINING', load = 4):
         catalog["titles{}".format(streamer)] = lt.newList(tipo)
     catalog['movieTitles'] = lt.newList(tipo)
     catalog['showTitles'] = lt.newList(tipo)
-    catalog['actors'] = lt.newList("ARRAY_LIST",cmpfunction=compareactor)  
+    catalog['actors'] = mp.newMap(10000,
+                                   maptype= mapTipo,
+                                   loadfactor= load,
+                                   comparefunction=compareactor)  
     catalog['genres'] = mp.newMap(10000,
                                    maptype= mapTipo,
                                    loadfactor= load,
@@ -87,13 +90,11 @@ def newCatalog(tipo = 'ARRAY_LIST', mapTipo = 'CHAINING', load = 4):
 def addTitles(catalog, title, streamer):
     '''O(1)'''
     lt.addLast(catalog['titles{}'.format(streamer)], title)
-    genres = title['listed_in'].split(",")
+    
     directors = title['director'].split(",")
     
-    addGenre(catalog,  title)
-    actor = title["cast"].split(",")
-    for a in actor: 
-        addActor(catalog,a.strip(),title) 
+    addGenre(catalog,title)
+    addActor(catalog,title) 
     
     for director in directors:
         addDirector(catalog, director.strip(), title)
@@ -117,20 +118,15 @@ def addGenre(catalog,title):
             mp.put(generos,g,genero) 
     return catalog
 
-def addActor(catalog,nameactor,title):
+def addActor(catalog,title):
     '''O(1)'''
-    actores = catalog["actors"] 
-    posactor = lt.isPresent(catalog["actors"],nameactor)
-    if posactor > 0: 
-        actor = lt.getElement(catalog["actors"],posactor)   
-    else: 
-        actor = newActor(nameactor)
-        lt.addLast(actores,actor) 
-    if title["type"] == "Movie": 
-        lt.addLast(actor["peliculas"],title) 
-    else: 
-        lt.addLast(actor["shows"],title) 
-    return actores 
+    actores = catalog['actors'] 
+    actor = [i.strip() for i in title["cast"].split(",")] 
+    for a in actor: 
+        if not mp.contains(actores,a):
+            act = newActor(a)
+            mp.put(actores,a,act) 
+    return catalog 
 
 def addDirector(catalog, directorname, title):
     '''O(1)'''
@@ -169,7 +165,7 @@ def newGenre(name):
 def newActor(nameactor):
     '''O(1)'''
     actors = {"actor": "", "peliculas": None, "shows": None}
-    actors["actor"] = nameactor
+    actors["actor"] = nameactor 
     actors["peliculas"] = lt.newList("ARRAY_LIST") 
     actors["shows"] = lt.newList("ARRAY_LIST")
     return actors 
@@ -237,17 +233,51 @@ def requerimiento5(catalog,pais):
     lista,baa = mergeSort(hola,"var",cmpReq5)
     return [lm,ls,lista]
 
+
+
+
+
+
+
+
+
 def buscarActor(catalog,actor):
     '''O(N)'''
     peliculas = 0
     shows = 0
-    for a in lt.iterator(catalog["actors"]):
-        if a["actor"] == actor: 
-            peliculas = a["peliculas"]
-            shows = a["shows"]
-    sa.sort(peliculas,ordernarpeliculas)  
-    sa.sort(shows,ordernarpeliculas)  
-    return peliculas, shows 
+    datos = lt.newList("ARRAY_LIST")
+    #Esto es un diccionario de diccionarios
+    act = mp.get(catalog["actors"],actor)
+    act2 = me.getValue(act)
+    if act:
+        peliculas = lt.size(act["peliculas"])
+        shows = lt.size(act["shows"]) 
+        info_actor(catalog,actor,act,datos)
+    #¿Cómo ordeno aca?
+    sa.sort(act2["peliculas"],ordernarpeliculas)
+    sa.sort(act2["shows"],ordernarpeliculas)    
+    return peliculas, shows , act2 
+
+
+def info_actor(catalog,actor,act,datos): 
+
+    n_produccion = {}
+    for i in act["peliculas"]:
+        n_produccion[i] = lt.newList("ARRAY_LIST")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def encontrarRepetidosG(directors):
     '''O(N)'''
