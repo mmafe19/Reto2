@@ -150,15 +150,19 @@ def addDirector(catalog, directorname, title):
     else: 
         infodirector = me.getValue(mp.get(directors,directorname))
     
+    lt.addLast(infodirector["titles"],title)
     if title["type"] == "Movie": 
         lt.addLast(infodirector["peliculas"],title) 
     else: 
         lt.addLast(infodirector["shows"],title)
 
-    generos = title["listed_in"].split(",")
-    for g in generos:
-        lt.addLast(infodirector["genres"],g)
-        
+    for i in lt.iterator(infodirector["titles"]):
+        generos = i["listed_in"].split(",") 
+        for g in generos:
+            lt.addLast(infodirector["genres"],g)
+    for s in lt.iterator(infodirector["titles"]):
+        streamer = s["streamer"]
+        lt.addLast(infodirector["streamers"],streamer)      
     return directors
 
 # Funciones para creacion de datos
@@ -184,7 +188,7 @@ def newDirector(name):
     '''O(1)'''
     director = {'nombre': "", 'movies': None, 'shows': None, 'titles': None, 'genres': None, 'streamers': None}
     director['nombre'] = name
-    director['movies'] = lt.newList('ARRAY_LIST')
+    director['peliculas'] = lt.newList('ARRAY_LIST')
     director['shows'] = lt.newList('ARRAY_LIST')
     director['titles'] = lt.newList('ARRAY_LIST')
     director['genres'] = lt.newList('ARRAY_LIST')
@@ -265,22 +269,22 @@ def buscarActor(catalog,actor):
 
 
 
-def encontrarRepetidosG(directors):
+def encontrarRepetidosG(directors,directorname):
     '''O(N)'''
-    lugar = directors['genres']
+    lugar = me.getValue(mp.get(directors,directorname))
     repe = {}
-    for genero in lt.iterator(lugar):
+    for genero in lt.iterator(lugar["genres"]): 
         if genero in repe:
             repe[genero] += 1
         else:
             repe[genero] = 1
-    return repe
+    return repe 
 
-def encontrarRepetidosS(directors):
+def encontrarRepetidosS(directors,directorname):
     '''O(N)'''
-    lugar = directors['streamers']
+    lugar = me.getValue(mp.get(directors,directorname))
     repe = {}
-    for genero in lt.iterator(lugar):
+    for genero in lt.iterator(lugar["genres"]):
         if genero in repe:
             repe[genero] += 1
         else:
@@ -355,11 +359,11 @@ def getTopGenres(genres, number):
 
 def getMoviesByDirector(catalog, name):
     '''O(1)'''
-    lugar = catalog['model']['directors']
-    
-    posdir = lt.isPresent(lugar, name)
-    if posdir > 0:
-        director = lt.getElement(lugar, posdir)
+    #¿Por qué usas el model?
+    #lugar = catalog['model']['directors']
+    lugar = catalog["directors"]
+    if mp.contains(lugar,name):
+        director = me.getValue(mp.get(lugar,name))
         return director
     return None
 
@@ -440,9 +444,10 @@ def comparetitles(title1, title2):
 
 def compareDirectors(dir1, dir):
     '''O(1)'''
-    if dir1.lower() == dir['nombre'].lower():
+    direntry = me.getKey(dir)
+    if dir1 == direntry:
         return 0
-    elif dir1.lower() > dir['nombre'].lower():
+    elif dir1 > direntry:
         return 1
     return -1
 

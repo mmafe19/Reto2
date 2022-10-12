@@ -282,10 +282,10 @@ def printDirectorData(director):
     w = PrettyTable()
     if director:
         print('Director buscado: ' + director['nombre'] + '\n')
-        mov = controller.sortDirectors(director['movies'])
+        mov = controller.sortDirectors(director['peliculas'])
         sho = controller.sortDirectors(director['shows'])
         titulos = controller.sortDirectors(director['titles'])
-        peliculas = ['Movies', lt.size(director['movies'])]
+        peliculas = ['Movies', lt.size(director['peliculas'])]
         shows = ['Shows', lt.size(director['shows'])]
         titulosnum.append(peliculas)
         titulosnum.append(shows)
