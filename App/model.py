@@ -79,7 +79,10 @@ def newCatalog(tipo = 'ARRAY_LIST', mapTipo = 'CHAINING', load = 4):
                                    maptype= mapTipo,
                                    loadfactor= load,
                                    comparefunction=compareGenre)
-    catalog['directors'] = lt.newList('ARRAY_LIST', cmpfunction=compareDirectors)
+    catalog['directors'] = mp.newMap(10000,
+                                   maptype= mapTipo,
+                                   loadfactor= load,
+                                   comparefunction=compareDirectors)
 
 
 
@@ -98,7 +101,8 @@ def addTitles(catalog, title, streamer):
     actor = title["cast"].split(",")
     for a in actor: 
         addActor(catalog,a.strip(),title)
-
+        
+    directors = title['director'].split(",")
     for director in directors:
         addDirector(catalog, director.strip(), title)
     return catalog
@@ -140,24 +144,21 @@ def addActor(catalog,nameactor,title):
 def addDirector(catalog, directorname, title):
     '''O(1)'''
     directors = catalog['directors']
-    posdir = lt.isPresent(directors, directorname)
-    if posdir > 0:
-        director = lt.getElement(directors, posdir)
-    else:
-        director = newDirector(directorname)
-        lt.addLast(directors, director)
-    lt.addLast(director['titles'], title)
-    if title['type'] == 'Movie':
-        lt.addLast(director['movies'], title)
-    else:
-        lt.addLast(director['shows'], title)
-    for i in lt.iterator(director['titles']):
-        genre = i['listed_in'].split(",")
-        for g in genre:
-            lt.addLast(director['genres'], g)
-    for s in lt.iterator(director['titles']):
-        streamer = s['streamer']
-        lt.addLast(director['streamers'], streamer)
+    if not mp.contains(directors,directorname):
+        infodirector = newDirector(directorname)
+        mp.put(directors,directorname,infodirector)
+    else: 
+        infodirector = me.getValue(mp.get(directors,directorname))
+    
+    if title["type"] == "Movie": 
+        lt.addLast(infodirector["peliculas"],title) 
+    else: 
+        lt.addLast(infodirector["shows"],title)
+
+    generos = title["listed_in"].split(",")
+    for g in generos:
+        lt.addLast(infodirector["genres"],g)
+        
     return directors
 
 # Funciones para creacion de datos
