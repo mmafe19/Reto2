@@ -94,8 +94,11 @@ def addTitles(catalog, title, streamer):
     directors = title['director'].split(",")
     
     addGenre(catalog,title)
-    addActor(catalog,title) 
-    
+
+    actor = title["cast"].split(",")
+    for a in actor: 
+        addActor(catalog,a.strip(),title)
+
     for director in directors:
         addDirector(catalog, director.strip(), title)
     return catalog
@@ -118,15 +121,21 @@ def addGenre(catalog,title):
             mp.put(generos,g,genero) 
     return catalog
 
-def addActor(catalog,title):
+def addActor(catalog,nameactor,title):
     '''O(1)'''
     actores = catalog['actors'] 
-    actor = [i.strip() for i in title["cast"].split(",")] 
-    for a in actor: 
-        if not mp.contains(actores,a):
-            act = newActor(a)
-            mp.put(actores,a,act) 
-    return catalog 
+    # actor = [i.strip() for i in title["cast"].split(",")] 
+    # for a in actor: 
+    if not mp.contains(actores,nameactor):
+            act = newActor(nameactor)
+            mp.put(actores,nameactor,act)
+    else: 
+            act = me.getValue(mp.get(actores,nameactor))
+    if title["type"] == "Movie": 
+        lt.addLast(act["peliculas"],title) 
+    else: 
+        lt.addLast(act["shows"],title)  
+    return actores  
 
 def addDirector(catalog, directorname, title):
     '''O(1)'''
@@ -235,47 +244,23 @@ def requerimiento5(catalog,pais):
 
 
 
-
-
-
-
-
-
 def buscarActor(catalog,actor):
     '''O(N)'''
     peliculas = 0
     shows = 0
     datos = lt.newList("ARRAY_LIST")
     #Esto es un diccionario de diccionarios
-    act = mp.get(catalog["actors"],actor)
-    act2 = me.getValue(act)
+    act = me.getValue(mp.get(catalog["actors"],actor))
     if act:
         peliculas = lt.size(act["peliculas"])
         shows = lt.size(act["shows"]) 
-        info_actor(catalog,actor,act,datos)
-    #¿Cómo ordeno aca?
-    sa.sort(act2["peliculas"],ordernarpeliculas)
-    sa.sort(act2["shows"],ordernarpeliculas)    
-    return peliculas, shows , act2 
+    sa.sort(act["peliculas"],ordernarpeliculas)
+    sa.sort(act["shows"],ordernarpeliculas)   
 
-
-def info_actor(catalog,actor,act,datos): 
-
-    n_produccion = {}
-    for i in act["peliculas"]:
-        n_produccion[i] = lt.newList("ARRAY_LIST")
-
-
-
-
-
-
-
-
-
-
-
-
+    lt.addLast(datos,peliculas)
+    lt.addLast(datos,shows)
+    lt.addLast(datos,act) 
+    return datos 
 
 
 
@@ -470,9 +455,10 @@ def comparegenres(genre1, genre):
 
 def compareactor(nombreactor, actor):
     '''O(1)'''
-    if nombreactor == actor['actor']:
+    authentry = me.getKey(actor) 
+    if nombreactor == authentry:
         return 0 
-    elif nombreactor > actor['actor']:
+    elif nombreactor > authentry:
         return 1
     else:
         return -1

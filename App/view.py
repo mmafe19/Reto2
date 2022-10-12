@@ -258,19 +258,21 @@ def printActorData(catalog, actor):
     x.max_width = 25
     x.hrules = True 
     respuesta = controller.buscar_peliculas_por_actor(catalog, actor) 
-    peliculas = respuesta[0] 
-    shows = respuesta[1]
+    peliculas = lt.getElement(respuesta,1)
+    shows = lt.getElement(respuesta,2)
+    act = lt.getElement(respuesta,0) 
     datos = []
 
-    for titulos in lt.iterator(peliculas): 
-        titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
-        datos.append(titulo)
-    for titulos in lt.iterator(shows): 
-        titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
-        datos.append(titulo)
-    print(tabulate([["Movie", lt.size(peliculas)],["Shows", lt.size(shows)]]))
+    
+    for titulos in lt.iterator(act["peliculas"]): 
+         titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
+         datos.append(titulo)
+    for titulos in lt.iterator(act["shows"]): 
+         titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
+         datos.append(titulo)
+    print(tabulate([["Movie",peliculas],["Shows", shows]]))
     x.add_rows(datos)
-    print(x)
+    print(x) 
 
 def printDirectorData(director):
     '''O(N^{3/2})'''

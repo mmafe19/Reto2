@@ -177,7 +177,7 @@ def moviesSize(control):
 
 def buscar_peliculas_por_actor(control, actor):
     '''O(N)'''
-    return model.buscarActor(control["model"], actor)
+    return model.buscarActor(control["model"], actor) 
 
 def movieSublist(catalog, pos, numelem):
     '''O(1)'''
