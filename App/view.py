@@ -262,19 +262,21 @@ def printActorData(catalog, actor):
     shows = lt.getElement(respuesta,2)
     act = lt.getElement(respuesta,0) 
     datos = []
-
     
-    for titulos in lt.iterator(act["peliculas"]): 
-         titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
-         datos.append(titulo)
+    i = 1
+    for titulos in lt.iterator(act["titles"]):
+         if i <= 3 or i > lt.size(act["titles"])-3:  
+          titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
+          datos.append(titulo)
+          i +=1 
     for titulos in lt.iterator(act["shows"]): 
-         titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
-         datos.append(titulo)
+          titulo = [titulos["type"], titulos["title"],titulos["release_year"],titulos["director"],titulos["duration"],titulos["cast"],titulos["country"], titulos["listed_in"], titulos["description"]]
+          datos.append(titulo)
     print(tabulate([["Movie",peliculas],["Shows", shows]]))
     x.add_rows(datos)
     print(x) 
 
-def printDirectorData(director):
+def printDirectorData(director,directorname):
     '''O(N^{3/2})'''
     titulosnum = []
     x = PrettyTable()
@@ -305,7 +307,7 @@ def printDirectorData(director):
         print('Estos son los servicios de streaming en los que aparece el director ' + director['nombre'])
         print(tabulate(datosStreamers, headers=['Streamer', 'Número de titulos'], tablefmt='grid'))
             
-        if (peliculas[1] + shows[1]) > 4:
+        if (peliculas[1] + shows[1]) > 6:
             primerost = controller.getFirstTitlesByGenreOrDir(titulos)
             ultimost = controller.getLastTitlesByGenreOrDir(titulos)
             print('Estos son los 3 primeros titulos: ')
@@ -523,7 +525,7 @@ while True:
 
         directorname = input("Director que desea buscar: ")
         director = controller.getMoviesByDirector(control, directorname)
-        printDirectorData(director) 
+        printDirectorData(director,directorname) 
 
         end_time = getTime()
         delta_time = deltaTime(start_time, end_time)

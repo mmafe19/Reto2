@@ -138,7 +138,8 @@ def addActor(catalog,nameactor,title):
     if title["type"] == "Movie": 
         lt.addLast(act["peliculas"],title) 
     else: 
-        lt.addLast(act["shows"],title)  
+        lt.addLast(act["shows"],title)
+    lt.addLast(act["titles"],title)   
     return actores  
 
 def addDirector(catalog, directorname, title):
@@ -163,7 +164,7 @@ def addDirector(catalog, directorname, title):
     for s in lt.iterator(infodirector["titles"]):
         streamer = s["streamer"]
         lt.addLast(infodirector["streamers"],streamer)      
-    return directors
+    return directors 
 
 # Funciones para creacion de datos
 
@@ -182,6 +183,7 @@ def newActor(nameactor):
     actors["actor"] = nameactor 
     actors["peliculas"] = lt.newList("ARRAY_LIST") 
     actors["shows"] = lt.newList("ARRAY_LIST")
+    actors['titles'] = lt.newList('ARRAY_LIST')
     return actors 
 
 def newDirector(name):
@@ -261,6 +263,7 @@ def buscarActor(catalog,actor):
         shows = lt.size(act["shows"]) 
     sa.sort(act["peliculas"],ordernarpeliculas)
     sa.sort(act["shows"],ordernarpeliculas)   
+    sa.sort(act["titles"],ordernarpeliculas)
 
     lt.addLast(datos,peliculas)
     lt.addLast(datos,shows)
@@ -269,27 +272,27 @@ def buscarActor(catalog,actor):
 
 
 
-def encontrarRepetidosG(directors,directorname):
+def encontrarRepetidosG(directors):
     '''O(N)'''
-    lugar = me.getValue(mp.get(directors,directorname))
+    lugar = directors['genres']
     repe = {}
-    for genero in lt.iterator(lugar["genres"]): 
-        if genero in repe:
-            repe[genero] += 1
-        else:
-            repe[genero] = 1
-    return repe 
-
-def encontrarRepetidosS(directors,directorname):
-    '''O(N)'''
-    lugar = me.getValue(mp.get(directors,directorname))
-    repe = {}
-    for genero in lt.iterator(lugar["genres"]):
+    for genero in lt.iterator(lugar):
         if genero in repe:
             repe[genero] += 1
         else:
             repe[genero] = 1
     return repe
+
+def encontrarRepetidosS(directors):
+    '''O(N)'''
+    lugar = directors['streamers']
+    repe = {}
+    for genero in lt.iterator(lugar):
+        if genero in repe:
+            repe[genero] += 1
+        else:
+            repe[genero] = 1
+    return repe 
 
 def getFirstTitles(catalog,streamer):
     '''O(1)'''
@@ -361,7 +364,7 @@ def getMoviesByDirector(catalog, name):
     '''O(1)'''
     #¿Por qué usas el model?
     #lugar = catalog['model']['directors']
-    lugar = catalog["directors"]
+    lugar = catalog["model"]["directors"]
     if mp.contains(lugar,name):
         director = me.getValue(mp.get(lugar,name))
         return director
